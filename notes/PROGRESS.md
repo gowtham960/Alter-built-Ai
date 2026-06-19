@@ -9,6 +9,11 @@
 - Added SQL schema and seed data
 - Added sample contract clauses
 
+- Frontend React app runs successfully.
+- Backend FastAPI app runs successfully.
+- Frontend calls POST /ask and displays the mock change-order recommendation.
+- Milestone 1 mock agent flow is complete.
+
 ## In Progress
 
 - Run the app locally once
