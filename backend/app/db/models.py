@@ -2,6 +2,7 @@ from sqlalchemy import Date, Integer, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.database import Base
+from sqlalchemy import Date, DateTime, Integer, Numeric, String, Text
 
 
 class Project(Base):
@@ -78,3 +79,13 @@ class ChangeOrder(Base):
     approved_days: Mapped[int | None] = mapped_column(Integer)
     approved_cost: Mapped[object | None] = mapped_column(Numeric(12, 2))
     summary: Mapped[str | None] = mapped_column(Text)
+class DocumentChunk(Base):
+    __tablename__ = "document_chunks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    project_id: Mapped[str | None] = mapped_column(String(20))
+    source_filename: Mapped[str | None] = mapped_column(String(255))
+    source_type: Mapped[str | None] = mapped_column(String(100))
+    chunk_index: Mapped[int | None] = mapped_column(Integer)
+    chunk_text: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[object | None] = mapped_column(DateTime)

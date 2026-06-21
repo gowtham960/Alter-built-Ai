@@ -2,6 +2,14 @@ import json
 import os
 
 from groq import Groq
+from app.db.repositories import (
+    check_weather_records,
+    find_similar_change_orders,
+    query_project_schedule,
+    search_document_chunks,
+    search_rfi_logs,
+    search_site_notes,
+)
 
 from app.db.repositories import (
     check_weather_records,
@@ -49,13 +57,14 @@ def analyze_change_order_question(question: str) -> ChatResponse:
     issue_type = detect_issue_type(question)
 
     raw_evidence = [
-        search_contract_clauses(question),
-        query_project_schedule(issue_type),
-        search_site_notes(issue_type),
-        check_weather_records(issue_type),
-        search_rfi_logs(issue_type),
-        find_similar_change_orders(issue_type),
-    ]
+    search_contract_clauses(question),
+    query_project_schedule(issue_type),
+    search_site_notes(issue_type),
+    check_weather_records(issue_type),
+    search_rfi_logs(issue_type),
+    find_similar_change_orders(issue_type),
+    search_document_chunks(question),
+]
 
     recommendation = build_recommendation(issue_type, raw_evidence)
     evidence = [EvidenceItem(**item) for item in raw_evidence]

@@ -17,6 +17,14 @@ from app.db.models import (
     SiteNote,
     WeatherRecord,
 )
+from app.db.models import (
+    ChangeOrder,
+    DocumentChunk,
+    ProjectSchedule,
+    RfiLog,
+    SiteNote,
+    WeatherRecord,
+)
 
 # Search terms used to find the most relevant rows for each issue type.
 ISSUE_SEARCH_TERMS = {
@@ -192,4 +200,27 @@ def find_similar_change_orders(issue_type: str):
             f"Reason: {row.reason}. Requested {row.requested_days} day(s)/${row.requested_cost}. "
             f"Outcome: {row.summary}"
         ),
+    }
+def search_document_chunks(question: str):
+    keywords = [w.lower() for w in question.split() if len(w) > 4]
+    with _session() as session:
+        stmt = select(DocumentChunk)
+        if keywords:
+            stmt = stmt.where(
+                or_(*[DocumentChunk.chunk_text.ilike(f"%{kw}%") for kw in keywords[:5]])
+            )
+        stmt = stmt.limit(2)
+        rows = session.scalars(stmt).first()
+
+    if not rows:
+        return {
+            "source_type": "Uploaded Documents",
+            "source_name": "No matching document found",
+            "detail": "No relevant content found in uploaded project documents.",
+        }
+
+    return {
+        "source_type": "Uploaded Documents",
+        "source_name": rows.source_filename,
+        "detail": rows.chunk_text,
     }
