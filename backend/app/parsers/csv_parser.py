@@ -1,20 +1,14 @@
-from typing import Dict, Any
-import pandas as pd
+import csv
 
-
-def parse_csv(file_path: str) -> Dict[str, Any]:
-    df = pd.read_csv(file_path)
-    rows = df.fillna("").to_dict(orient="records")
-
-    text_rows = []
-    for i, row in enumerate(rows, start=1):
-        row_text = ", ".join(f"{key}: {value}" for key, value in row.items())
-        text_rows.append(f"Row {i}: {row_text}")
-
+def parse_csv(file_path: str) -> dict:
+    rows = []
+    with open(file_path, newline='', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            rows.append(dict(row))
+    text = "\n".join([", ".join(f"{k}: {v}" for k, v in row.items()) for row in rows])
     return {
-        "content_type": "table",
-        "columns": list(df.columns),
+        "content_type": "spreadsheet",
+        "text": text,
         "row_count": len(rows),
-        "rows": rows,
-        "text": "\n".join(text_rows),
     }
