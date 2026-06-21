@@ -1,25 +1,33 @@
-from typing import Dict, Any
-import pandas as pd
+from typing import Any, Dict
+import openpyxl
 
 
 def parse_xlsx(file_path: str) -> Dict[str, Any]:
-    workbook = pd.read_excel(file_path, sheet_name=None)
+    workbook = openpyxl.load_workbook(file_path, data_only=True)
     sheets = {}
     text_parts = []
 
-    for sheet_name, df in workbook.items():
-        df = df.fillna("")
-        rows = df.to_dict(orient="records")
+    for sheet_name in workbook.sheetnames:
+        ws = workbook[sheet_name]
+        rows = list(ws.iter_rows(values_only=True))
+        if not rows:
+            continue
+
+        headers = [str(h) if h is not None else "" for h in rows[0]]
+        data_rows = []
+        for row in rows[1:]:
+            row_dict = {headers[i]: (str(v) if v is not None else "") for i, v in enumerate(row)}
+            data_rows.append(row_dict)
 
         sheets[sheet_name] = {
-            "columns": list(df.columns),
-            "row_count": len(rows),
-            "rows": rows,
+            "columns": headers,
+            "row_count": len(data_rows),
+            "rows": data_rows,
         }
 
         text_parts.append(f"Sheet: {sheet_name}")
-        for i, row in enumerate(rows, start=1):
-            row_text = ", ".join(f"{key}: {value}" for key, value in row.items())
+        for i, row in enumerate(data_rows, start=1):
+            row_text = ", ".join(f"{k}: {v}" for k, v in row.items())
             text_parts.append(f"Row {i}: {row_text}")
 
     return {
