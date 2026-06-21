@@ -77,3 +77,8 @@ python evaluate_rag.py
 - `GET /` — Health check
 - `POST /ask` — Ask a change-order question
 - `POST /upload` — Upload a project document
+## Live Demo
+
+- **Frontend:** https://alter-built-ai.vercel.app
+- **Backend API:** https://alter-built-ai-backend.onrender.com
+- **API Docs:** https://alter-built-ai-backend.onrender.com/docs

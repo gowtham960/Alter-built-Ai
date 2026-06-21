@@ -38,3 +38,14 @@ npm run dev
 RAG Evaluation:
 cd backend
 python evaluate_rag.py
+## Current Status
+✅ FULLY DEPLOYED AND LIVE
+
+- Frontend: https://alter-built-ai.vercel.app
+- Backend: https://alter-built-ai-backend.onrender.com
+- Database: Supabase (Session Pooler connection)
+
+## Next Features to Build
+- Multi-project support (project_id per company)
+- Supabase Auth for user login
+- OCR for scanned PDFs
