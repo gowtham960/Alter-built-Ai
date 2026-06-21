@@ -40,14 +40,38 @@ This starter version includes:
 - Learning notes
 - Git workflow notes
 
-## Run Backend
+## Run with Docker (backend + database)
+
+The fastest way to run the full stack. This starts Postgres (auto-loaded with
+the schema and seed data) and the backend together:
+
+```bash
+docker compose up --build
+```
+
+Backend URL: `http://localhost:8000` — Postgres: `localhost:5432`.
+
+## Run Backend (manual)
+
+The retrieval tools query a Postgres database. Set `DATABASE_URL` to a local
+Postgres or a Supabase connection string (see `backend/.env.example`). If the
+database is unreachable, the agent falls back to built-in mock data so the demo
+still works.
 
 ```bash
 cd backend
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env   # then edit DATABASE_URL
 uvicorn app.main:app --reload
+```
+
+To load the schema and seed data into your own Postgres:
+
+```bash
+psql "$DATABASE_URL" -f ../data/sql/schema.sql
+psql "$DATABASE_URL" -f ../data/sql/seed.sql
 ```
 
 Backend URL:

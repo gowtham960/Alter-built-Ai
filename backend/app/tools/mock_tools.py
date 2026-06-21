@@ -1,3 +1,10 @@
+import logging
+
+from app.db import repositories
+
+logger = logging.getLogger(__name__)
+
+
 CONTRACT_CLAUSES = [
     {
         "issue_type": "weather",
@@ -169,6 +176,21 @@ def _find_by_issue_type(records, issue_type: str):
     }
 
 
+def _with_db_fallback(db_call, fallback_records, issue_type: str):
+    """Run a database query, falling back to mock records if the DB is unreachable.
+
+    This keeps the demo functional even without a running database, while
+    preferring real data whenever it is available.
+    """
+    try:
+        return db_call(issue_type)
+    except Exception as error:  # pragma: no cover - defensive fallback
+        logger.warning("DB query failed (%s); falling back to mock data.", error)
+        return _find_by_issue_type(fallback_records, issue_type)
+
+
+# Contract clauses are not stored in the relational schema yet; they live in
+# contract documents and will be served by vector search in a later milestone.
 def search_contract_clauses(question: str):
     issue_type = detect_issue_type(question)
     return _find_by_issue_type(CONTRACT_CLAUSES, issue_type)
@@ -176,7 +198,9 @@ def search_contract_clauses(question: str):
 
 def query_project_schedule(question: str):
     issue_type = detect_issue_type(question)
-    return _find_by_issue_type(PROJECT_SCHEDULE, issue_type)
+    return _with_db_fallback(
+        repositories.query_project_schedule, PROJECT_SCHEDULE, issue_type
+    )
 
 
 def query_schedule(question: str):
@@ -185,35 +209,23 @@ def query_schedule(question: str):
 
 def search_site_notes(question: str):
     issue_type = detect_issue_type(question)
-    return _find_by_issue_type(SITE_NOTES, issue_type)
+    return _with_db_fallback(repositories.search_site_notes, SITE_NOTES, issue_type)
 
 
 def check_weather_records(question: str):
     issue_type = detect_issue_type(question)
-
-    if issue_type != "weather":
-        return {
-            "source_type": "Weather Records",
-            "source_name": "Weather check not required",
-            "detail": "The question does not appear to depend on weather evidence.",
-        }
-
-    return _find_by_issue_type(WEATHER_RECORDS, issue_type)
+    return _with_db_fallback(
+        repositories.check_weather_records, WEATHER_RECORDS, issue_type
+    )
 
 
 def search_rfi_logs(question: str):
     issue_type = detect_issue_type(question)
-
-    if issue_type != "design":
-        return {
-            "source_type": "RFI Log",
-            "source_name": "RFI check not required",
-            "detail": "The question does not appear to depend on drawing conflict or RFI evidence.",
-        }
-
-    return _find_by_issue_type(RFI_LOGS, issue_type)
+    return _with_db_fallback(repositories.search_rfi_logs, RFI_LOGS, issue_type)
 
 
 def find_similar_change_orders(question: str):
     issue_type = detect_issue_type(question)
-    return _find_by_issue_type(CHANGE_ORDER_HISTORY, issue_type)
+    return _with_db_fallback(
+        repositories.find_similar_change_orders, CHANGE_ORDER_HISTORY, issue_type
+    )

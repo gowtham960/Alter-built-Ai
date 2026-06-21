@@ -85,13 +85,13 @@ def analyze_change_order_question(question: str) -> ChatResponse:
     issue_type = detect_issue_type(question)
 
     raw_evidence = [
-        search_contract_clauses(question),
-        query_project_schedule(question),
-        search_site_notes(question),
-        check_weather_records(question),
-        search_rfi_logs(question),
-        find_similar_change_orders(question),
-    ]
+    search_contract_clauses(question),
+    query_project_schedule(issue_type),
+    search_site_notes(issue_type),
+    check_weather_records(issue_type),
+    search_rfi_logs(issue_type),
+    find_similar_change_orders(issue_type),
+]
 
     evidence = [EvidenceItem(**item) for item in raw_evidence]
     recommendation = build_recommendation(issue_type)

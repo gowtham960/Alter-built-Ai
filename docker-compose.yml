@@ -1,7 +1,33 @@
 services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=alterbuilt
+      - POSTGRES_PASSWORD=alterbuilt
+      - POSTGRES_DB=alterbuilt
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      # Auto-loaded on first start, in alphabetical order: schema before seed.
+      - ./data/sql/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./data/sql/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alterbuilt -d alterbuilt"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   backend:
     build: ./backend
     ports:
       - "8000:8000"
     environment:
       - APP_NAME=Alter Built AI
+      - DATABASE_URL=postgresql+psycopg2://alterbuilt:alterbuilt@db:5432/alterbuilt
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:
